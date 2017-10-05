@@ -44,7 +44,6 @@ export function booksReducers(state = {
    }
    break;
   case "UPDATE_BOOK":
-   16
    // Create a copy of the current array of books
    const currentBookToUpdate = [...state.books]
    // Determine at which index in books array is the book to be deleted
