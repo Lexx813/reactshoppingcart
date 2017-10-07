@@ -141,10 +141,14 @@ class Cart extends React.Component {
             <Modal.Title>Modal heading</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-       <h5>test</h5>
+       <h6>Your order has been saved</h6>
+       <p>You will recieve an email confirmation</p>
           </Modal.Body>
           <Modal.Footer>
-            <Button onClick={this.close}>Close</Button>
+          <Col xs={6}>
+          <h6>Total $:{this.props.totalAmount}</h6>
+          </Col>
+            <Button onClick={this.close.bind(this)}>Close</Button>
           </Modal.Footer>
         </Modal>
    </Panel>
@@ -153,7 +157,9 @@ class Cart extends React.Component {
 }
 
 function mapStateToProps(state) {
- return {cart: state.cart.cart}
+ return {cart: state.cart.cart,
+  totalAmount: state.cart.totalAmount,
+}
 }
 function mapDispatchToProps(dispatch) {
  return bindActionCreators({

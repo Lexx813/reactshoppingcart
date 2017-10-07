@@ -6,7 +6,7 @@ const path = require('path');
 //Renders your static files
 app.use(express.static('public'))
 
-app.get('/', (req, res) => {
+app.get('*', (req, res) => {
  res.sendfile(path.resolve(__dirname, 'public', 'index.html'))
 })
 
