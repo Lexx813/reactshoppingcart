@@ -17,37 +17,42 @@ import {
   Button
 } from 'react-bootstrap';
 import {findDOMNode} from 'react-dom';
-import {postBooks, deleteBooks, getBooks} from '../../actions/booksActions';
+import {postBooks, deleteBooks, getBooks, resetButton} from '../../actions/booksActions';
 import axios from 'axios';
 
 class BooksForm extends React.Component {
   constructor() {
     super();
     this.state = {
-      images: [],
+      images: [
+        {}
+      ],
       img: ''
     }
   }
   componentDidMount() {
-    this.props.getBooks();
-    //GET BOOKS
+    this
+      .props
+      .getBooks();
+    //GET IMAGES FROM API
     axios
       .get('/api/images')
       .then(function (response) {
-        this.setState({images: response.data})
+
+        this.setState({images: response.data});
       }.bind(this))
-      .catch(function(err){
-        this.setState({images:'error loading image files from the server', img:''})
-      })     
+      .catch(function (err) {
+        this.setState({images: 'error loading image files from the server', img: ''})
+      }.bind(this))
   }
 
   handleSubmit() {
     const book = [
       {
-        
+
         title: findDOMNode(this.refs.title).value,
         description: findDOMNode(this.refs.description).value,
-        images:findDOMNode(this.refs.image).value,
+        images: findDOMNode(this.refs.image).value,
         price: findDOMNode(this.refs.price).value
       }
     ]
@@ -63,12 +68,21 @@ class BooksForm extends React.Component {
       .props
       .deleteBooks(bookId);
   }
-  handleSelect(img){
+  handleSelect(img) {
     this.setState({
-      img:'/images/'+ img
+      img: '/images/' + img
     })
   }
-
+  resetForm() {
+    //RESET THE Button
+    this
+      .props
+      .resetButton();
+    findDOMNode(this.refs.title).value = '';
+    findDOMNode(this.refs.description).value = '';
+    findDOMNode(this.refs.price).value = '';
+    this.setState({img: ''});
+  }
   render() {
     const booksList = this
       .props
@@ -79,11 +93,20 @@ class BooksForm extends React.Component {
             {booksArr._id}</option>
         )
       })
-const imgList = this.state.images.map(function(imgArr, i){
-  return(
-  <MenuItem key={i} eventKey={imgArr.name} onClick={this.handleSelect.bind(this,imgArr.name)}>{imgArr.name}</MenuItem>
-  )
-}, this)
+    const imgList = this
+      .state
+      .images
+      .map(function (imgArr, i) {
+        return (
+          <MenuItem
+            key={i}
+            eventKey={imgArr.name}
+            onClick={this
+            .handleSelect
+            .bind(this, imgArr.name)}>{imgArr.name}</MenuItem>
+        )
+      }, this)
+
     return (
       <Well>
         <Row>
@@ -94,7 +117,7 @@ const imgList = this.state.images.map(function(imgArr, i){
                 <DropdownButton
                   componentClass={InputGroup.Button}
                   id="input-dropdown-addon"
-                  title="Select an Image"
+                  title="Select an image"
                   bsStyle="primary">
                   {imgList}
                 </DropdownButton>
@@ -104,28 +127,35 @@ const imgList = this.state.images.map(function(imgArr, i){
           </Col>
           <Col xs={12} sm={6}>
             <Panel>
-              <FormGroup controlId="title">
+              <FormGroup controlId="title" validationState={this.props.validation}>
+
                 <ControlLabel>Title</ControlLabel>
-                <FormControl type="text" placeholder="Enter Title" ref="title"></FormControl>
+                <FormControl type="text" placeholder="Enter Title" ref="title"/>
+                <FormControl.Feedback/>
               </FormGroup>
-              <FormGroup controlId="description">
+              <FormGroup controlId="description" validationState={this.props.validation}>
                 <ControlLabel>Description</ControlLabel>
-                <FormControl type="text" placeholder="Enter Description" ref="description"></FormControl>
+                <FormControl type="text" placeholder="Enter Description" ref="description"/>
+                <FormControl.Feedback/>
               </FormGroup>
-              <FormGroup controlId="price">
+              <FormGroup controlId="price" validationState={this.props.validation}>
                 <ControlLabel>Price</ControlLabel>
-                <FormControl type="text" placeholder="Enter Price" ref="price"></FormControl>
+                <FormControl type="text" placeholder="Enter Price" ref="price"/>
+                <FormControl.Feedback/>
               </FormGroup>
               <Button
-                onClick={this
-                .handleSubmit
-                .bind(this)}
-                bsStyle="primary">Save
+                onClick={(!this.props.msg)
+                ? (this.handleSubmit.bind(this))
+                : (this.resetForm.bind(this))}
+                bsStyle={(!this.props.style)
+                ? ("primary")
+                : (this.props.style)}>
+                {(!this.props.msg)
+                  ? ("Save book")
+                  : (this.props.msg)}
               </Button>
             </Panel>
-            <Panel style={{
-              marginTop: '25px'
-            }}>
+            <Panel>
               <FormGroup controlId="formControlsSelect">
                 <ControlLabel>Select a book id to delete</ControlLabel>
                 <FormControl ref="delete" componentClass="select" placeholder="select">
@@ -137,24 +167,24 @@ const imgList = this.state.images.map(function(imgArr, i){
                 onClick={this
                 .onDelete
                 .bind(this)}
-                bsStyle="danger">Delete a Book</Button>
+                bsStyle="danger">Delete book</Button>
             </Panel>
           </Col>
         </Row>
-
       </Well>
     )
   }
 }
 
 function mapStateToProps(state) {
-  return {books: state.books.books}
+  return {books: state.books.books, msg: state.books.msg, style: state.books.style, validation: state.books.validation}
 }
 function mapDispatchToProps(dispatch) {
   return bindActionCreators({
     postBooks,
     deleteBooks,
-    getBooks
+    getBooks,
+    resetButton
   }, dispatch)
 }
 export default connect(mapStateToProps, mapDispatchToProps)(BooksForm);
